@@ -12,7 +12,7 @@ extensions = [
 
 setuptools.setup(
     name             = 'keras-retinanet',
-    version          = '0.4.1',
+    version          = '0.5.0',
     description      = 'Keras implementation of RetinaNet object detection.',
     url              = 'https://github.com/fizyr/keras-retinanet',
     author           = 'Hans Gaiser',
@@ -20,7 +20,7 @@ setuptools.setup(
     maintainer       = 'Hans Gaiser',
     maintainer_email = 'h.gaiser@fizyr.com',
     packages         = setuptools.find_packages(),
-    install_requires = ['keras', 'keras-resnet', 'six', 'scipy', 'cython'],
+    install_requires = ['keras', 'keras-resnet', 'six', 'scipy', 'cython', 'Pillow', 'opencv-python', 'progressbar2'],
     entry_points     = {
         'console_scripts': [
             'retinanet-train=keras_retinanet.bin.train:main',
