@@ -117,7 +117,7 @@ def generate_images_annotations_json(main_dir, metadata_dir, subset, cls_index, 
 
         with open(validation_image_ids_path, 'r') as csv_file:
             reader = csv.DictReader(csv_file, fieldnames=['ImageID'])
-            reader.next()
+            next(reader)
             for line, row in enumerate(reader):
                 image_id = row['ImageID']
                 validation_image_ids[image_id] = True
@@ -269,16 +269,16 @@ class OpenImagesGenerator(Generator):
             # there is/are no other sublabel(s) other than the labels itself
 
             for label in labels_filter:
-                for i, lb in id_to_labels:
+                for i, lb in id_to_labels.items():
                     if lb == label:
                         children_id_to_labels[i] = label
                         break
         else:
             parent_cls = None
-            for i, lb in id_to_labels.iteritems():
+            for i, lb in id_to_labels.items():
                 if lb == parent_label:
                     parent_id = i
-                    for c, index in cls_index.iteritems():
+                    for c, index in cls_index.items():
                         if index == parent_id:
                             parent_cls = c
                     break
@@ -298,7 +298,7 @@ class OpenImagesGenerator(Generator):
                 label = id_to_labels[index]
                 children_id_to_labels[index] = label
 
-        id_map = dict([(ind, i) for i, ind in enumerate(children_id_to_labels.iterkeys())])
+        id_map = dict([(ind, i) for i, ind in enumerate(children_id_to_labels.keys())])
 
         filtered_annotations = {}
         for k in self.annotations:
@@ -314,7 +314,7 @@ class OpenImagesGenerator(Generator):
             if len(filtered_boxes) > 0:
                 filtered_annotations[k] = {'w': img_ann['w'], 'h': img_ann['h'], 'boxes': filtered_boxes}
 
-        children_id_to_labels = dict([(id_map[i], l) for (i, l) in children_id_to_labels.iteritems()])
+        children_id_to_labels = dict([(id_map[i], l) for (i, l) in children_id_to_labels.items()])
 
         return children_id_to_labels, filtered_annotations
 
@@ -323,6 +323,16 @@ class OpenImagesGenerator(Generator):
 
     def num_classes(self):
         return len(self.id_to_labels)
+
+    def has_label(self, label):
+        """ Return True if label is a known label.
+        """
+        return label in self.id_to_labels
+
+    def has_name(self, name):
+        """ Returns True if name is a known class.
+        """
+        raise NotImplementedError()
 
     def name_to_label(self, name):
         raise NotImplementedError()
@@ -348,7 +358,7 @@ class OpenImagesGenerator(Generator):
         labels = image_annotations['boxes']
         height, width = image_annotations['h'], image_annotations['w']
 
-        boxes = np.zeros((len(labels), 5))
+        annotations = {'labels': np.empty((len(labels),)), 'bboxes': np.empty((len(labels), 4))}
         for idx, ann in enumerate(labels):
             cls_id = ann['cls_id']
             x1 = ann['x1'] * width
@@ -356,10 +366,10 @@ class OpenImagesGenerator(Generator):
             y1 = ann['y1'] * height
             y2 = ann['y2'] * height
 
-            boxes[idx, 0] = x1
-            boxes[idx, 1] = y1
-            boxes[idx, 2] = x2
-            boxes[idx, 3] = y2
-            boxes[idx, 4] = cls_id
+            annotations['bboxes'][idx, 0] = x1
+            annotations['bboxes'][idx, 1] = y1
+            annotations['bboxes'][idx, 2] = x2
+            annotations['bboxes'][idx, 3] = y2
+            annotations['labels'][idx, 4] = cls_id
 
-        return boxes
+        return annotations

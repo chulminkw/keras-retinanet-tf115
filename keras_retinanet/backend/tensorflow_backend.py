@@ -17,6 +17,18 @@ limitations under the License.
 import tensorflow
 
 
+def ones(*args, **kwargs):
+    """ See https://www.tensorflow.org/versions/master/api_docs/python/tf/ones .
+    """
+    return tensorflow.ones(*args, **kwargs)
+
+
+def transpose(*args, **kwargs):
+    """ See https://www.tensorflow.org/versions/master/api_docs/python/tf/transpose .
+    """
+    return tensorflow.transpose(*args, **kwargs)
+
+
 def map_fn(*args, **kwargs):
     """ See https://www.tensorflow.org/versions/master/api_docs/python/tf/map_fn .
     """

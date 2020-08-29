@@ -76,9 +76,10 @@ class KittiGenerator(Generator):
         1    rotation_y   Rotation ry around Y-axis in camera coordinates [-pi..pi]
         """
 
-        self.id_to_labels = {}
-        for label, id in kitti_classes.items():
-            self.id_to_labels[id] = label
+        self.labels = {}
+        self.classes = kitti_classes
+        for name, label in self.classes.items():
+            self.labels[label] = name
 
         self.image_data = dict()
         self.images = []
@@ -112,7 +113,17 @@ class KittiGenerator(Generator):
     def num_classes(self):
         """ Number of classes in the dataset.
         """
-        return max(kitti_classes.values()) + 1
+        return max(self.classes.values()) + 1
+
+    def has_label(self, label):
+        """ Return True if label is a known label.
+        """
+        return label in self.labels
+
+    def has_name(self, name):
+        """ Returns True if name is a known class.
+        """
+        return name in self.classes
 
     def name_to_label(self, name):
         """ Map name to label.
@@ -122,7 +133,7 @@ class KittiGenerator(Generator):
     def label_to_name(self, label):
         """ Map label to name.
         """
-        return self.id_to_labels[label]
+        return self.labels[label]
 
     def image_aspect_ratio(self, image_index):
         """ Compute the aspect ratio for an image with image_index.
@@ -139,13 +150,14 @@ class KittiGenerator(Generator):
     def load_annotations(self, image_index):
         """ Load annotations for an image_index.
         """
-        annotations = self.image_data[image_index]
+        image_data = self.image_data[image_index]
+        annotations = {'labels': np.empty((len(image_data),)), 'bboxes': np.empty((len(image_data), 4))}
 
-        boxes = np.zeros((len(annotations), 5))
-        for idx, ann in enumerate(annotations):
-            boxes[idx, 0] = float(ann['x1'])
-            boxes[idx, 1] = float(ann['y1'])
-            boxes[idx, 2] = float(ann['x2'])
-            boxes[idx, 3] = float(ann['y2'])
-            boxes[idx, 4] = int(ann['cls_id'])
-        return boxes
+        for idx, ann in enumerate(image_data):
+            annotations['bboxes'][idx, 0] = float(ann['x1'])
+            annotations['bboxes'][idx, 1] = float(ann['y1'])
+            annotations['bboxes'][idx, 2] = float(ann['x2'])
+            annotations['bboxes'][idx, 3] = float(ann['y2'])
+            annotations['labels'][idx] = int(ann['cls_id'])
+
+        return annotations

@@ -53,19 +53,9 @@ def preprocess_image(x, mode='caffe'):
         x /= 127.5
         x -= 1.
     elif mode == 'caffe':
-        if keras.backend.image_data_format() == 'channels_first':
-            if x.ndim == 3:
-                x[0, :, :] -= 103.939
-                x[1, :, :] -= 116.779
-                x[2, :, :] -= 123.68
-            else:
-                x[:, 0, :, :] -= 103.939
-                x[:, 1, :, :] -= 116.779
-                x[:, 2, :, :] -= 123.68
-        else:
-            x[..., 0] -= 103.939
-            x[..., 1] -= 116.779
-            x[..., 2] -= 123.68
+        x[..., 0] -= 103.939
+        x[..., 1] -= 116.779
+        x[..., 2] -= 123.68
 
     return x
 
@@ -97,7 +87,6 @@ class TransformParameters:
         fill_mode:             One of: 'constant', 'nearest', 'reflect', 'wrap'
         interpolation:         One of: 'nearest', 'linear', 'cubic', 'area', 'lanczos4'
         cval:                  Fill value to use with fill_mode='constant'
-        data_format:           Same as for keras.preprocessing.image.apply_transform
         relative_translation:  If true (the default), interpret translation as a factor of the image size.
                                If false, interpret it as absolute pixels.
     """
@@ -106,24 +95,12 @@ class TransformParameters:
         fill_mode            = 'nearest',
         interpolation        = 'linear',
         cval                 = 0,
-        data_format          = None,
         relative_translation = True,
     ):
         self.fill_mode            = fill_mode
         self.cval                 = cval
         self.interpolation        = interpolation
         self.relative_translation = relative_translation
-
-        if data_format is None:
-            data_format = keras.backend.image_data_format()
-        self.data_format = data_format
-
-        if data_format == 'channels_first':
-            self.channel_axis = 0
-        elif data_format == 'channels_last':
-            self.channel_axis = 2
-        else:
-            raise ValueError("invalid data_format, expected 'channels_first' or 'channels_last', got '{}'".format(data_format))
 
     def cvBorderMode(self):
         if self.fill_mode == 'constant':
@@ -162,9 +139,6 @@ def apply_transform(matrix, image, params):
       image:  The image to transform.
       params: The transform parameters (see TransformParameters)
     """
-    if params.channel_axis != 2:
-        image = np.moveaxis(image, params.channel_axis, 2)
-
     output = cv2.warpAffine(
         image,
         matrix[:2, :],
@@ -173,10 +147,33 @@ def apply_transform(matrix, image, params):
         borderMode  = params.cvBorderMode(),
         borderValue = params.cval,
     )
-
-    if params.channel_axis != 2:
-        output = np.moveaxis(output, 2, params.channel_axis)
     return output
+
+
+def compute_resize_scale(image_shape, min_side=800, max_side=1333):
+    """ Compute an image scale such that the image size is constrained to min_side and max_side.
+
+    Args
+        min_side: The image's min side will be equal to min_side after resizing.
+        max_side: If after resizing the image's max side is above max_side, resize until the max side is equal to max_side.
+
+    Returns
+        A resizing scale.
+    """
+    (rows, cols, _) = image_shape
+
+    smallest_side = min(rows, cols)
+
+    # rescale the image so the smallest side is min_side
+    scale = min_side / smallest_side
+
+    # check if the largest side is now greater than max_side, which can happen
+    # when images have a large aspect ratio
+    largest_side = max(rows, cols)
+    if largest_side * scale > max_side:
+        scale = max_side / largest_side
+
+    return scale
 
 
 def resize_image(img, min_side=800, max_side=1333):
@@ -189,18 +186,8 @@ def resize_image(img, min_side=800, max_side=1333):
     Returns
         A resized image.
     """
-    (rows, cols, _) = img.shape
-
-    smallest_side = min(rows, cols)
-
-    # rescale the image so the smallest side is min_side
-    scale = min_side / smallest_side
-
-    # check if the largest side is now greater than max_side, which can happen
-    # when images have a large aspect ratio
-    largest_side = max(rows, cols)
-    if largest_side * scale > max_side:
-        scale = max_side / largest_side
+    # compute scale to resize the image
+    scale = compute_resize_scale(img.shape, min_side=min_side, max_side=max_side)
 
     # resize the image with the computed scale
     img = cv2.resize(img, None, fx=scale, fy=scale)
