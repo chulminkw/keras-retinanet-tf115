@@ -37,10 +37,10 @@ class VGGBackbone(Backbone):
         Weights can be downloaded at https://github.com/fizyr/keras-models/releases .
         """
         if self.backbone == 'vgg16':
-            resource = keras.applications.vgg16.WEIGHTS_PATH_NO_TOP
+            resource = keras.applications.vgg16.vgg16.WEIGHTS_PATH_NO_TOP
             checksum = '6d6bbae143d832006294945121d1f1fc'
         elif self.backbone == 'vgg19':
-            resource = keras.applications.vgg19.WEIGHTS_PATH_NO_TOP
+            resource = keras.applications.vgg19.vgg19.WEIGHTS_PATH_NO_TOP
             checksum = '253f8cb515780f3b799900260a226db6'
         else:
             raise ValueError("Backbone '{}' not recognized.".format(self.backbone))
@@ -84,9 +84,9 @@ def vgg_retinanet(num_classes, backbone='vgg16', inputs=None, modifier=None, **k
 
     # create the vgg backbone
     if backbone == 'vgg16':
-        vgg = keras.applications.VGG16(input_tensor=inputs, include_top=False)
+        vgg = keras.applications.VGG16(input_tensor=inputs, include_top=False, weights=None)
     elif backbone == 'vgg19':
-        vgg = keras.applications.VGG19(input_tensor=inputs, include_top=False)
+        vgg = keras.applications.VGG19(input_tensor=inputs, include_top=False, weights=None)
     else:
         raise ValueError("Backbone '{}' not recognized.".format(backbone))
 

@@ -107,7 +107,7 @@ retinanet-train oid /path/to/OID
 
 # You can also specify a list of labels if you want to train on a subset
 # by adding the argument 'labels_filter':
-keras_retinanet/bin/train.py oid /path/to/OID --labels_filter=Helmet,Tree
+keras_retinanet/bin/train.py oid /path/to/OID --labels-filter=Helmet,Tree
 
 # You can also specify a parent label if you want to train on a branch
 # from the semantic hierarchical tree (i.e a parent and all children)
@@ -226,6 +226,11 @@ Example output images using `keras-retinanet` are shown below.
 </p>
 
 ### Projects using keras-retinanet
+* [Improving RetinaNet for CT Lesion Detection with Dense Masks from Weak RECIST Labels](https://arxiv.org/abs/1906.02283). Research project for detecting lesions in CT using keras-retinanet.
+* [NudeNet](https://github.com/bedapudi6788/NudeNet). Project that focuses on detecting and censoring of nudity.
+* [Individual tree-crown detection in RGB imagery using self-supervised deep learning neural networks](https://www.biorxiv.org/content/10.1101/532952v1). Research project focused on improving the performance of remotely sensed tree surveys.
+* [ESRI Object Detection Challenge 2019](https://github.com/kunwar31/ESRI_Object_Detection). Winning implementation of the ESRI Object Detection Challenge 2019.
+* [Lunar Rockfall Detector Project](https://ieeexplore.ieee.org/document/8587120). The aim of this project is to map lunar rockfalls on a global scale using the available > 1.6 million satellite images.
 * [NATO Innovation Challenge](https://medium.com/data-from-the-trenches/object-detection-with-deep-learning-on-aerial-imagery-2465078db8a9). The winning team of the NATO Innovation Challenge used keras-retinanet to detect cars in aerial images ([COWC dataset](https://gdo152.llnl.gov/cowc/)).
 * [Microsoft Research for Horovod on Azure](https://blogs.technet.microsoft.com/machinelearning/2018/06/20/how-to-do-distributed-deep-learning-for-object-detection-using-horovod-on-azure/). A research project by Microsoft, using keras-retinanet to distribute training over multiple GPUs using Horovod on Azure.
 * [Anno-Mage](https://virajmavani.github.io/saiat/). A tool that helps you annotate images, using input from the keras-retinanet COCO model as suggestions.
